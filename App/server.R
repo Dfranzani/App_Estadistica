@@ -27,7 +27,7 @@ function(input, output, session) {
     lines(x = grilla, y = teoricos, col = "darkblue")
     legend(
       "topright", title = "Distribución", bty = "n",
-      legend = c("Aproximada ", paste0("Normal teórica - TCL: N(", media, ", ", round(desviacion^2,5), ")")),
+      legend = c("Aproximada ", paste0("Teórica - TCL: N(", media, ", ", round(desviacion^2,5), ")")),
       lty = 1, col = c("darkred", "darkblue")
     )
   }
@@ -39,7 +39,7 @@ function(input, output, session) {
   
   plot_simulaciones = function(valores, dominio){
     largo = length(valores[[1]])
-    cantidad = 5
+    cantidad = 4
     datos = data.frame(
       "valores" = unlist(valores[1:cantidad]),
       "dominio" = rep(1:cantidad, rep(largo, cantidad))
@@ -48,14 +48,14 @@ function(input, output, session) {
       datos$dominio, datos$valores,
       main = paste("Primeras ", cantidad, " simulaciones"),
       xlab = "Simulación", ylab = "Valores de X simulados", xaxt = "n",
-      las = 1, pch = 16, ylim = c(min(datos$valores), max(datos$valores)*1.2)
+      las = 1, pch = 16, ylim = c(min(datos$valores), max(datos$valores)*1.4)
     )
     axis(side = 1, at = 1:cantidad, labels = paste0("S", 1:cantidad))
     legend(
       "top", 
       legend = paste0(rep("S", cantidad), 1:cantidad, rep(": ", cantidad),
                       unlist(lapply(X = valores[1: cantidad], FUN = function(x){return(round(mean(x), 4))}))),
-      bty = "n", horiz = TRUE, title = "Media de la simulación")
+      bty = "n", title = "Media de la simulación", ncol = 2)
   }
 
   observeEvent(input$go_DM1,{
