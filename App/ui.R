@@ -1,6 +1,7 @@
 library(shiny)
 library(shinydashboard)
-# library(shinyjs)
+library(Cairo)
+options(shiny.usecairo = T)
 
 # Encabezado general
 
@@ -13,7 +14,7 @@ panelLateral = dashboardSidebar(
   collapsed = FALSE,
   sidebarMenu(
     menuItem(
-      "Distribuciones muestrales", tabName = "DM", startExpanded = TRUE,
+      "Distribuciones muestrales", startExpanded = TRUE, tabName = "DM",
       menuSubItem("TCL", tabName = "DM1")
     ),
     menuItem("IC: Intervalos de confianza", tabName = "IC")#,
