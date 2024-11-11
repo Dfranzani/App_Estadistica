@@ -17,13 +17,8 @@ panelLateral = dashboardSidebar(
       "Distribuciones muestrales", startExpanded = TRUE, tabName = "DM",
       menuSubItem("TCL", tabName = "DM1")
     ),
-    menuItem("IC: Intervalos de confianza", tabName = "IC")#,
-    # menuItem(
-    #   "Pruebas de Hipótesis", tabName = "PH", startExpanded = TRUE,
-    #   menuSubItem("Para una media", tabName = "PH1"),
-    #   menuSubItem("Para dos medias", tabName = "PH2"),
-    #   menuSubItem("Para varianzas", tabName = "PH3")
-    # ),
+    menuItem("IC: Intervalos de confianza", tabName = "IC"),
+    menuItem("Pruebas de Hipótesis", tabName = "PH")#,
     # menuItem(
     #   "Regresión Lineal", tabName = "RL", startExpanded = TRUE,
     #   menuSubItem("Simple", tabName = "RL1"),
@@ -117,12 +112,37 @@ cuerpo_IC = sidebarLayout(
   )
 )
 
+simulador3 = actionButton(inputId = "go_PH", label = "Simular")
+
+cuerpo_PH = sidebarLayout(
+  sidebarPanel(
+    width = 3,
+    radioButtons(inputId = "mediasPH", label = "Medias", choices = c("Una")),#, "Dos")),
+    radioButtons(inputId = "varianazasPH", label = "Varianzas", choices = c("Conocidas")),#, "Desconocidas")),
+    radioButtons(inputId = "tipoPH", label = "Tipo de prueba", choices = c("Bilateral", "Unilateral derecha", "Unilateral izquierda")),
+    sliderInput(inputId = "mu0PH", label = "Media bajo Hipótesis nula", min = -20, max = 20, value = 0, step = 0.1),
+    sliderInput(inputId = "sigma2PH", label = "Varianza poblacional", min = 1, max = 20, value = 6, step = 0.1),
+    sliderInput(inputId = "mediaMuestraPH", label = "Media muestral", min = -20, max = 20, value = 2, step = 0.1),
+    sliderInput(inputId = "nPH", label = "Tamaño muestral", min = 10, max = 200, value = 120, step = 10),
+    sliderInput(inputId = "confianzaPH", label = "% Confianza", min = 10, max = 99, value = 95, step = 1),
+    simulador3
+  ),
+  mainPanel(
+    width = 9,
+    fluidRow(
+      column(width = 6, plotOutput("plot_ph")),
+      column(width = 6, plotOutput("plot_ic_ph"))
+    )
+  )
+)
+
 # Asignando los cuerpos por filtro
 hoja_DM = tabItem(tabName = "DM1", fluidPage(cuerpo_DM1))
 hoja_IC = tabItem(tabName = "IC", fluidPage(cuerpo_IC))
+hoja_PH = tabItem(tabName = "PH", fluidPage(cuerpo_PH))
 
 cuerpo = dashboardBody(
-  tabItems(hoja_DM, hoja_IC)
+  tabItems(hoja_DM, hoja_IC, hoja_PH)
 )
 
 # Despliegue general

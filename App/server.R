@@ -2,7 +2,6 @@ library(shiny)
 
 function(input, output, session) {
   
-  
   ### Distribuciones muestrales
   
   observeEvent(input$distribucionDM1,{
@@ -392,7 +391,101 @@ function(input, output, session) {
       })
     }
   })
+  
+  ### Pruebas de hipótesis
+  
+  # Función para generar el gráfico del estadístico de prueba
+  
+  # Función para generar el gráfico del IC
+  grafico_IC_PH = function(ic, mediaMuestra, varianza, mu0, tipoPH, nMuestra){
+
+    limites = mu0 + c(-1,1)*3*sqrt(varianza/nMuestra)
+    
+    valores_x = seq(from = limites[1], to = limites[2], by = 0.01)
+    plot(x = valores_x, y = dnorm(x = valores_x, mean = mu0, sd = sqrt(varianza/nMuestra)),
+         main = "Distribución de la media", xlab = "Valores del promedio", ylab = "Densidad",
+         las = 1, xaxt = "n", type = "l", bty = "n")
+    axis(side = 1, at = round(c(limites[1], mu0, limites[2]), 3),
+         labels = round(c(limites[1], mu0, limites[2]), 3),
+         col.axis = "darkblue", cex.axis = 1.2)
+    
+  }
+  
+  valor_critico = function(confianza, tipo, mu0, varianza, nMuestra, mediaMuestra){
+    if(tipo == "two.sided") {
+      valor_critico = qnorm(1 - (1 - confianza)/2)
+    } else if(tipo == "less") {
+      valor_critico = qnorm(1 - confianza)
+    } else {
+      valor_critico = qnorm(confianza)
+    }
+    
+    estadistico_prueba = (mediaMuestra - mu0)/(sqrt(varianza/nMuestra))
+    
+    return(c(estadistico_prueba, valor_critico))
+  }
+  
+  
+  observeEvent(input$go_PH, {
+    confianza = input$confianzaPH/100
+    mu0 = input$mu0PH
+    mediaMuestra = input$mediaMuestraPH
+    tipoPH = switch(input$tipoPH, "Bilateral" = "two.sided", "Unilateral derecha" = "greater", "Unilateral izquierda" = "less")
+    extremos = switch(tipoPH, "two.sided" = 1:2, "less" = 2, "greater" = 1)
+    varianza = input$sigma2PH
+    nombre_media = "Una"
+    nMuestra = input$nPH
+    
+    # Los argumentos data debe ser el promedio n veces para que calce con el cálculo del IC de la función "calculo_IC"
+    ic = calculo_IC(data1 = rep(mediaMuestra, nMuestra), tipo = tipoPH, varianzas_conocidas = TRUE, varianza = varianza,
+                    extremos = extremos, confianza = confianza, media = mediaMuestra, tamanos_muestrales = nMuestra)
+    
+    valor_critico = valor_critico(confianza = confianza, tipo = tipoPH, mu0 = mu0, varianza = varianza,
+    nMuestra = nMuestra, mediaMuestra = mediaMuestra)
+      
+    output$plot_ph = renderPlot({
+      plot(ic[1], ic[2])
+    }, height = 400)
+    
+    output$plot_ic_ph = renderPlot({
+      grafico_IC_PH(ic = ic, media = mediaMuestra, varianza = varianza, mu0 = mu0, tipoPH = tipoPH, nMuestra = nMuestra)
+    }, height = 400)
+    
+  })
+
+  
+# End general function  
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
