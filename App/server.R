@@ -467,7 +467,7 @@ function(input, output, session) {
       max_teorico = mu0 + qnorm(1 - (1 - confianza))*sqrt(varianza/nMuestra)
     }
     
-    max = max(abs(c(mu0 - c(as.numeric(ic[1:2]), abs(max_teorico), 1.5*sqrt(varianza/nMuestra)))))
+    max = max(abs(c(mu0 - c(as.numeric(ic[1:2]), abs(max_teorico), mu0 + 2*sqrt(varianza/nMuestra)))))
     limites = c(mu0 - max * 1.2, mu0 + max * 1.2)
     
     max_y =  max(dnorm(x = mu0, mean = mu0, sd = sqrt(varianza/nMuestra)))*0.5
