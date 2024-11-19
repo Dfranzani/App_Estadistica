@@ -1,4 +1,7 @@
 library(shiny)
+library(shinydashboard)
+library(Cairo)
+options(shiny.usecairo = T)
 
 function(input, output, session) {
   
