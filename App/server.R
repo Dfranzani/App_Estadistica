@@ -394,21 +394,108 @@ function(input, output, session) {
   
   ### Pruebas de hipótesis
   
-  # Función para generar el gráfico del estadístico de prueba
+  grafico_estadisticoPrueba = function(ic, mediaMuestra, varianza, mu0, tipoPH, nMuestra, est_prueba, valor_critico, confianza){
+    
+    max = max(abs(c(0 - c(est_prueba, valor_critico, 4))))
+    limites = c(0 - max * 1.2, 0 + max * 1.2)
+    
+    valores_x = seq(from = limites[1], to = limites[2], by = 0.01)
+    valores_x = c(valores_x, est_prueba, valor_critico, -est_prueba, -valor_critico)
+    valores_x = valores_x[order(valores_x)]
+    
+    plot(x = valores_x, y = dnorm(x = valores_x),
+         main = "Distribución del estadístico de prueba", xlab = "Valores de Z", ylab = "Densidad",
+         las = 1, xaxt = "n", type = "l", bty = "n", xlim = limites, ylim = c(0, 0.5))
+    axis(side = 1, at = c(limites[1], 0, limites[2]),
+         labels = round(c(limites[1], 0, limites[2]), 2), cex.axis = 1, las = 1)
+    
+    if(tipoPH == "two.sided") {
+      axis(side = 1, at = c(-est_prueba, est_prueba), labels = round(c(-est_prueba, est_prueba), 2),
+           col.axis = "red", cex.axis = 1, las = 1)
+      axis(side = 1, at = c(-valor_critico, valor_critico), labels = round(c(-valor_critico, valor_critico), 2),
+           col.axis = "blue", cex.axis = 1, las = 1)
+      polygon(x = c(-abs(valor_critico), valores_x[valores_x <= -abs(valor_critico)]),
+              y = c(min(dnorm(x = valores_x[valores_x <= -abs(valor_critico)])), dnorm(x = valores_x[valores_x <= -abs(valor_critico)])),
+              lty = 2, density = 5, col = "blue")
+      polygon(x = c(-abs(est_prueba), valores_x[valores_x <= -abs(est_prueba)]),
+              y = c(min(dnorm(x = valores_x[valores_x <= -abs(est_prueba)])), dnorm(x = valores_x[valores_x <= -abs(est_prueba)])),
+              lty = 2, density = 5, col = "red", angle = 135)
+      polygon(x = c(abs(valor_critico), valores_x[valores_x >= abs(valor_critico)]),
+              y = c(min(dnorm(x = valores_x[valores_x >= abs(valor_critico)])), dnorm(x = valores_x[valores_x >= abs(valor_critico)])),
+              lty = 2, density = 5, col = "blue")
+      polygon(x = c(abs(est_prueba), valores_x[valores_x >= abs(est_prueba)]),
+              y = c(min(dnorm(x = valores_x[valores_x >= abs(est_prueba)])), dnorm(x = valores_x[valores_x >= abs(est_prueba)])),
+              lty = 2, density = 5, col = "red", angle = 135)
+      valor_p = 2 - 2*pnorm(abs(est_prueba))
+    } else if(tipoPH == "less") {
+      axis(side = 1, at = c(est_prueba), labels = round(c(est_prueba), 2),
+           col.axis = "red", cex.axis = 1, las = 1)
+      axis(side = 1, at = c(valor_critico), labels = round(c(valor_critico), 2),
+           col.axis = "blue", cex.axis = 1, las = 1)
+      polygon(x = c(valor_critico, valores_x[valores_x <= valor_critico]),
+              y = c(min(dnorm(x = valores_x[valores_x <= valor_critico])), dnorm(x = valores_x[valores_x <= valor_critico])),
+              lty = 2, density = 5, col = "blue")
+      polygon(x = c(est_prueba, valores_x[valores_x <= est_prueba]),
+              y = c(min(dnorm(x = valores_x[valores_x <= est_prueba])), dnorm(x = valores_x[valores_x <= est_prueba])),
+              lty = 2, density = 5, col = "red", angle = 135)
+      valor_p = pnorm(est_prueba)
+    } else {
+      axis(side = 1, at = c(est_prueba), labels = round(c(est_prueba), 2),
+           col.axis = "red", cex.axis = 1, las = 1)
+      axis(side = 1, at = c(valor_critico), labels = round(c(valor_critico), 2),
+           col.axis = "blue", cex.axis = 1, las = 1)
+      polygon(x = c(valor_critico, valores_x[valores_x >= valor_critico]),
+              y = c(min(dnorm(x = valores_x[valores_x >= valor_critico])), dnorm(x = valores_x[valores_x >= valor_critico])),
+              lty = 2, density = 5, col = "blue")
+      polygon(x = c(est_prueba, valores_x[valores_x >= est_prueba]),
+              y = c(min(dnorm(x = valores_x[valores_x >= est_prueba])), dnorm(x = valores_x[valores_x >= est_prueba])),
+              lty = 2, density = 5, col = "red", angle = 135)
+      valor_p = 1 - pnorm(est_prueba)
+    }
+    legend("topright", legend = paste(c("Valor-p:", "Significancia:"), round(c(valor_p, 1 - confianza), 4)), bty = "n",
+           lty = 2, col = c("red", "blue"))
+    legend("topleft", legend = ifelse(valor_p  <= 1 - confianza, "Se rechaza", "No se rechaza"), bty = "n", title = "Estado:", text.font = 4)
+  }
   
-  # Función para generar el gráfico del IC
-  grafico_IC_PH = function(ic, mediaMuestra, varianza, mu0, tipoPH, nMuestra){
-
-    limites = mu0 + c(-1,1)*3*sqrt(varianza/nMuestra)
+  grafico_IC_PH = function(ic, mediaMuestra, varianza, mu0, tipoPH, nMuestra, confianza){
+    
+    if(tipoPH == "two.sided") {
+      max_teorico = mu0 + qnorm(1 - (1 - confianza)/2)*sqrt(varianza/nMuestra)
+    } else if(tipoPH == "less") {
+      max_teorico = mu0 - qnorm(1 - (1 - confianza))*sqrt(varianza/nMuestra)
+    } else {
+      max_teorico = mu0 + qnorm(1 - (1 - confianza))*sqrt(varianza/nMuestra)
+    }
+    
+    max = max(abs(c(mu0 - c(as.numeric(ic[1:2]), abs(max_teorico), 1.5*sqrt(varianza/nMuestra)))))
+    limites = c(mu0 - max * 1.2, mu0 + max * 1.2)
+    
+    max_y =  max(dnorm(x = mu0, mean = mu0, sd = sqrt(varianza/nMuestra)))*0.5
+    min_y = min(dnorm(x = mu0, mean = mu0, sd = sqrt(varianza/nMuestra)))
     
     valores_x = seq(from = limites[1], to = limites[2], by = 0.01)
     plot(x = valores_x, y = dnorm(x = valores_x, mean = mu0, sd = sqrt(varianza/nMuestra)),
-         main = "Distribución de la media", xlab = "Valores del promedio", ylab = "Densidad",
-         las = 1, xaxt = "n", type = "l", bty = "n")
-    axis(side = 1, at = round(c(limites[1], mu0, limites[2]), 3),
-         labels = round(c(limites[1], mu0, limites[2]), 3),
-         col.axis = "darkblue", cex.axis = 1.2)
+         main = "Distribución de la media muestral \n e intervalo de confianza", xlab = "Valores del promedio", ylab = "Densidad",
+         las = 1, xaxt = "n", type = "l", bty = "n", xlim = limites, ylim = c(0, max_y*2.5))
+    axis(side = 1, at = c(limites[1], mu0, limites[2]),
+         labels = round(c(limites[1], mu0, limites[2]), 2),
+         col.axis = "black", cex.axis = 1, las = 1)
+    segments(x0 = mu0, x1 = mu0, y0 = 0, y1 = max_y*2, col = "black", lty = 2)
     
+    if(tipoPH == "two.sided") {
+      segments(x0 = as.numeric(ic[1]), x1 = as.numeric(ic[2]), y0 = max_y, y1 = max_y, col = "red", lty = 2)
+      legend("topleft", legend = paste0("(", round(as.numeric(ic[1]), 3), ",", round(as.numeric(ic[2]), 3), ")"),
+             bty = "n", title = "IC", lty = 2, col = "red")
+    } else if(tipoPH == "less") {
+      arrows(x1 = as.numeric(ic[1]), x0 = as.numeric(ic[2]), y0 = max_y, y1 = max_y, length = 0.1, col = "red", lty = 2)
+      legend("topleft", legend = paste0("(-Inf, ", round(as.numeric(ic[2]), 3), ")"),
+             bty = "n", title = "IC", lty = 2, col = "red")
+    } else {
+      arrows(x0 = as.numeric(ic[1]), x1 = as.numeric(ic[2]), y0 = max_y, y1 = max_y, length = 0.1, col = "red", lty = 2)
+      legend("topleft", legend = paste0("(", round(as.numeric(ic[1]), 3), ", Inf)"),
+             bty = "n", title = "IC", lty = 2, col = "red")
+    }
+    legend("topright", legend = mu0, bty = "n", title = "mu_0", lty = 2)
   }
   
   valor_critico = function(confianza, tipo, mu0, varianza, nMuestra, mediaMuestra){
@@ -444,11 +531,12 @@ function(input, output, session) {
     nMuestra = nMuestra, mediaMuestra = mediaMuestra)
       
     output$plot_ph = renderPlot({
-      plot(ic[1], ic[2])
+      grafico_estadisticoPrueba(ic = ic, media = mediaMuestra, varianza = varianza, mu0 = mu0, tipoPH = tipoPH, nMuestra = nMuestra,
+                    est_prueba = valor_critico[1], valor_critico = valor_critico[2], confianza = confianza)
     }, height = 400)
     
     output$plot_ic_ph = renderPlot({
-      grafico_IC_PH(ic = ic, media = mediaMuestra, varianza = varianza, mu0 = mu0, tipoPH = tipoPH, nMuestra = nMuestra)
+      grafico_IC_PH(ic = ic, media = mediaMuestra, varianza = varianza, mu0 = mu0, tipoPH = tipoPH, nMuestra = nMuestra, confianza = confianza)
     }, height = 400)
     
   })
