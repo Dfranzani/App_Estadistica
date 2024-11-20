@@ -13,17 +13,9 @@ panelLateral = dashboardSidebar(
   # useShinyjs(),
   collapsed = FALSE,
   sidebarMenu(
-    menuItem(
-      "Distribuciones muestrales", startExpanded = TRUE, tabName = "DM",
-      menuSubItem("TCL", tabName = "DM1")
-    ),
+    menuItem("Teorema Central del Límite", tabName = "DM1"),
     menuItem("IC: Intervalos de confianza", tabName = "IC"),
     menuItem("Pruebas de Hipótesis", tabName = "PH")#,
-    # menuItem(
-    #   "Regresión Lineal", tabName = "RL", startExpanded = TRUE,
-    #   menuSubItem("Simple", tabName = "RL1"),
-    #   menuSubItem("Múltiple", tabName = "RL2")
-    # )
   )
 )
 
@@ -145,4 +137,7 @@ cuerpo = dashboardBody(
 )
 
 # Despliegue general
-ui = dashboardPage(encabezado, panelLateral, cuerpo, skin = "black")
+ui = function(request) {
+  dashboardPage(encabezado, panelLateral, cuerpo, skin = "black")
+}
+
