@@ -3,7 +3,7 @@ library(shinydashboard)
 library(Cairo)
 options(shiny.usecairo = T)
 
-server = function(input, output, session) {
+function(input, output, session) {
   
   observeEvent(getQueryString(session)$tab, {
     currentQueryString <- getQueryString(session)$tab # alternative: parseQueryString(session$clientData$url_search)$tab

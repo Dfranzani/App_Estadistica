@@ -10,9 +10,9 @@ encabezado = dashboardHeader(title = "Estadística")
 # Panel lateral general: filtro de temas
 
 panelLateral = dashboardSidebar(
-  # useShinyjs(),
   collapsed = FALSE,
   sidebarMenu(
+    id = "sidebarID",
     menuItem("Teorema Central del Límite", tabName = "DM1"),
     menuItem("IC: Intervalos de confianza", tabName = "IC"),
     menuItem("Pruebas de Hipótesis", tabName = "PH")#,
@@ -137,7 +137,6 @@ cuerpo = dashboardBody(
 )
 
 # Despliegue general
-ui = function(request) {
-  dashboardPage(encabezado, panelLateral, cuerpo, skin = "black")
-}
+ui = dashboardPage(header = encabezado, sidebar = panelLateral, body = cuerpo, skin = "black")
+
 
