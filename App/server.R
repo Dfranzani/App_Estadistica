@@ -389,7 +389,7 @@ function(input, output, session) {
                           control_lanzamiento = TRUE, colores = ic[simulaciones_global,3:4])
         } else {
           hist_muestra_IC(x = muestras[[simulaciones_global]]$data1, y = muestras[[simulaciones_global]]$data2,
-                          nombre_media = nombre_media_global, control_lanzamiento = TRUE, colores = ic[simulaciones_global,3:4])
+                           nombre_media = nombre_media_global, control_lanzamiento = TRUE, colores = ic[simulaciones_global,3:4])
         }
       })
     }
@@ -401,6 +401,8 @@ function(input, output, session) {
     
     max = max(abs(c(0 - c(est_prueba, valor_critico, 4))))
     limites = c(0 - max * 1.2, 0 + max * 1.2)
+    
+    # print(c(limites, est_prueba, valor_critico, max))
     
     valores_x = seq(from = limites[1], to = limites[2], by = 0.01)
     valores_x = c(valores_x, est_prueba, valor_critico, -est_prueba, -valor_critico)
@@ -460,42 +462,46 @@ function(input, output, session) {
     legend("topleft", legend = ifelse(valor_p  <= 1 - confianza, "Se rechaza", "No se rechaza"), bty = "n", title = "Estado:", text.font = 4)
   }
   
-  grafico_IC_PH = function(ic, mediaMuestra, varianza, mu0, tipoPH, nMuestra, confianza){
+  grafico_IC_PH = function(ic, mediaMuestra, varianza, mu0, tipoPH, nMuestra, est_prueba, valor_critico, confianza){
     
-    if(tipoPH == "two.sided") {
-      max_teorico = mu0 + qnorm(1 - (1 - confianza)/2)*sqrt(varianza/nMuestra)
-    } else if(tipoPH == "less") {
-      max_teorico = mu0 - qnorm(1 - (1 - confianza))*sqrt(varianza/nMuestra)
-    } else {
-      max_teorico = mu0 + qnorm(1 - (1 - confianza))*sqrt(varianza/nMuestra)
-    }
-    
-    max = max(abs(c(mu0 - c(as.numeric(ic[1:2]), abs(max_teorico), mu0 + 2*sqrt(varianza/nMuestra)))))
-    limites = c(mu0 - max * 1.2, mu0 + max * 1.2)
-    
-    max_y =  max(dnorm(x = mu0, mean = mu0, sd = sqrt(varianza/nMuestra)))*0.5
-    min_y = min(dnorm(x = mu0, mean = mu0, sd = sqrt(varianza/nMuestra)))
+    max = max(abs(c(0 - c(est_prueba, valor_critico, 4))))
+    limites = c(0 - max * 1.2, 0 + max * 1.2)
     
     valores_x = seq(from = limites[1], to = limites[2], by = 0.01)
-    plot(x = valores_x, y = dnorm(x = valores_x, mean = mu0, sd = sqrt(varianza/nMuestra)),
+    valores_x = c(valores_x, est_prueba, valor_critico, -est_prueba, -valor_critico)
+    valores_x = valores_x[order(valores_x)]
+    valores_y = dnorm(x = valores_x)
+    
+    transformacion = function(x.barra){
+      return((x.barra - mu0)/sqrt(varianza/nMuestra))
+    }
+    
+    transformacion_inversa = function(Z0){
+      return(mu0 + Z0*sqrt(varianza/nMuestra))
+    }
+    
+    plot(x = valores_x, y = valores_y,
          main = "Distribución de la media muestral \n e intervalo de confianza", xlab = "Valores del promedio", ylab = "Densidad",
-         las = 1, xaxt = "n", type = "l", bty = "n", xlim = limites, ylim = c(0, max_y*2.5))
-    axis(side = 1, at = c(limites[1], mu0, limites[2]),
-         labels = round(c(limites[1], mu0, limites[2]), 2),
-         col.axis = "black", cex.axis = 1, las = 1)
-    segments(x0 = mu0, x1 = mu0, y0 = 0, y1 = max_y*2, col = "black", lty = 2)
+         las = 1, xaxt = "n", type = "l", bty = "n", xlim = limites, ylim = c(0, 0.5))
+    axis(side = 1, at = c(limites[1], 0, limites[2]),
+         labels = round(transformacion_inversa(c(limites[1], 0, limites[2])), 4), cex.axis = 1, las = 1)
+    segments(x0 = 0, x1 = 0, y0 = 0, y1 = max(valores_y), col = "black", lty = 2)
+    
+    ic = as.numeric(ic[1:2])
+    ic2 = transformacion(as.numeric(ic[1:2]))
+    max_y = max(valores_y)*0.5
     
     if(tipoPH == "two.sided") {
-      segments(x0 = as.numeric(ic[1]), x1 = as.numeric(ic[2]), y0 = max_y, y1 = max_y, col = "red", lty = 2)
-      legend("topleft", legend = paste0("(", round(as.numeric(ic[1]), 3), ",", round(as.numeric(ic[2]), 3), ")"),
+      segments(x0 = ic2[1], x1 = ic2[2], y0 = max_y, y1 = max_y, col = "red", lty = 2)
+      legend("topleft", legend = paste0("(", round(ic[1], 4), ", ", round(ic[2], 4), ")"),
              bty = "n", title = "IC", lty = 2, col = "red")
     } else if(tipoPH == "less") {
-      arrows(x1 = as.numeric(ic[1]), x0 = as.numeric(ic[2]), y0 = max_y, y1 = max_y, length = 0.1, col = "red", lty = 2)
-      legend("topleft", legend = paste0("(-Inf, ", round(as.numeric(ic[2]), 3), ")"),
+      arrows(x1 = limites[1], x0 = ic2[2], y0 = max_y, y1 = max_y, length = 0.1, col = "red", lty = 2)
+      legend("topleft", legend = paste0("(-Inf, ", round(ic[2], 4), ")"),
              bty = "n", title = "IC", lty = 2, col = "red")
     } else {
-      arrows(x0 = as.numeric(ic[1]), x1 = as.numeric(ic[2]), y0 = max_y, y1 = max_y, length = 0.1, col = "red", lty = 2)
-      legend("topleft", legend = paste0("(", round(as.numeric(ic[1]), 3), ", Inf)"),
+      arrows(x0 = ic2[1], x1 = limites[2], y0 = max_y, y1 = max_y, length = 0.1, col = "red", lty = 2)
+      legend("topleft", legend = paste0("(", round(ic[1], 4), ", Inf)"),
              bty = "n", title = "IC", lty = 2, col = "red")
     }
     legend("topright", legend = mu0, bty = "n", title = "mu_0", lty = 2)
@@ -509,9 +515,7 @@ function(input, output, session) {
     } else {
       valor_critico = qnorm(confianza)
     }
-    
     estadistico_prueba = (mediaMuestra - mu0)/(sqrt(varianza/nMuestra))
-    
     return(c(estadistico_prueba, valor_critico))
   }
   
@@ -539,7 +543,8 @@ function(input, output, session) {
     }, height = 400)
     
     output$plot_ic_ph = renderPlot({
-      grafico_IC_PH(ic = ic, media = mediaMuestra, varianza = varianza, mu0 = mu0, tipoPH = tipoPH, nMuestra = nMuestra, confianza = confianza)
+      grafico_IC_PH(ic = ic, media = mediaMuestra, varianza = varianza, mu0 = mu0, tipoPH = tipoPH, nMuestra = nMuestra,
+                    est_prueba = valor_critico[1], valor_critico = valor_critico[2], confianza = confianza)
     }, height = 400)
     
   })
