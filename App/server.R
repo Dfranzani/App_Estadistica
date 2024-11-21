@@ -196,10 +196,10 @@ function(input, output, session) {
       h1 = hist(x)
       h2 = hist(y)
       par(mar = c(0,5,3,3))
-      plot(h1, col = color, xlim = c(min(x, y), max(x,y)), ylim = c(0, max(h1$counts, h2$counts)),
+      plot(h1, col = color, xlim = c(min(h1$breaks, h2$breaks), max(h1$breaks, h2$breaks)), ylim = c(0, max(h1$counts, h2$counts)),
            las = 1, ylab = "Frecuencias de X", xaxt = "n", main = titulo)
       par(mar = c(5,5,0,3))
-      plot(h2, col = color, xlim = c(min(x, y), max(x,y)), ylim = c(max(h1$counts, h2$counts), 0),
+      plot(h2, col = color, xlim = c(min(h1$breaks, h2$breaks), max(h1$breaks, h2$breaks)), ylim = c(max(h1$counts, h2$counts), 0),
            las = 1, main = "", ylab = "Frecuencias de Y", xlab = "Valores de la muestra")
     }
   }
