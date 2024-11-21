@@ -5,36 +5,40 @@ options(shiny.usecairo = T)
 
 function(input, output, session) {
   
-  observeEvent(getQueryString(session)$tab, {
-    currentQueryString <- getQueryString(session)$tab # alternative: parseQueryString(session$clientData$url_search)$tab
-    if(is.null(input$sidebarID) || !is.null(currentQueryString) && currentQueryString != input$sidebarID){
-      freezeReactiveValue(input, "sidebarID")
-      updateTabItems(session, "sidebarID", selected = currentQueryString)
-    }
-  }, priority = 1)
+  ### CUSTOM URL FOR MENUITEM IN SIDEBARMENU
+  ### NOT WORK IN GITHUB PAGES!
   
-  observeEvent(input$sidebarID, {
-    currentQueryString <- getQueryString(session)$tab # alternative: parseQueryString(session$clientData$url_search)$tab
-    pushQueryString <- paste0("?tab=", input$sidebarID)
-    if(is.null(currentQueryString) || currentQueryString != input$sidebarID){
-      freezeReactiveValue(input, "sidebarID")
-      updateQueryString(pushQueryString, mode = "push", session)
-    }
-  }, priority = 0)
+  # observeEvent(getQueryString(session)$tab, {
+  #   currentQueryString <- getQueryString(session)$tab # alternative: parseQueryString(session$clientData$url_search)$tab
+  #   if(is.null(input$sidebarID) || !is.null(currentQueryString) && currentQueryString != input$sidebarID){
+  #     freezeReactiveValue(input, "sidebarID")
+  #     updateTabItems(session, "sidebarID", selected = currentQueryString)
+  #   }
+  # }, priority = 1)
+  # 
+  # observeEvent(input$sidebarID, {
+  #   currentQueryString <- getQueryString(session)$tab # alternative: parseQueryString(session$clientData$url_search)$tab
+  #   pushQueryString <- paste0("?tab=", input$sidebarID)
+  #   if(is.null(currentQueryString) || currentQueryString != input$sidebarID){
+  #     freezeReactiveValue(input, "sidebarID")
+  #     updateQueryString(pushQueryString, mode = "push", session)
+  #   }
+  # }, priority = 0)
   
-  # router_server()
+  ### END CUSTOM URL FOR MENUITEM IN SIDEBARMENU
+  
   
   ### Distribuciones muestrales
   
-  observeEvent(input$distribucionDM1,{
-    output$Histograma_promedios = renderPlot({
-      plot(1, 1, col = "white", ylab = "", xlab = "", axes = F)
-    })
-    
-    output$fdp_fmp_simulaciones = renderPlot({
-      plot(1, 1, col = "white", ylab = "", xlab = "", axes = F)
-    })
-  })
+  # observeEvent(input$distribucionDM1,{
+  #   output$Histograma_promedios = renderPlot({
+  #     plot(1, 1, col = "white", ylab = "", xlab = "", axes = F)
+  #   })
+  #   
+  #   output$fdp_fmp_simulaciones = renderPlot({
+  #     plot(1, 1, col = "white", ylab = "", xlab = "", axes = F)
+  #   })
+  # })
   
   histTCL = function(valores, media, desviacion, simulaciones){
     medias = unlist(lapply(X = valores, FUN = mean))
@@ -82,7 +86,7 @@ function(input, output, session) {
       bty = "n", title = "Media de la simulación", ncol = 2)
   }
 
-  observeEvent(input$go_DM1,{
+  observeEvent(list(input$go_DM1, input$distribucionDM1),{
     
     n = input$nDM1
     simulaciones = input$simulacionesDM1
@@ -332,7 +336,7 @@ function(input, output, session) {
   nombre_media_global = NULL
   simulaciones_global = NULL
   
-  observeEvent(input$go_IC,{
+  observeEvent(list(input$go_IC),{
     confianza = input$ConfianzaIC/100
     simulaciones = input$simulacionesIC
     simulaciones_global <<- simulaciones
@@ -395,20 +399,20 @@ function(input, output, session) {
       output$histogramaIC = renderPlot({
         if(nombre_media_global == "Una"){
           hist_muestra_IC(x = muestras[[punto_seleccionado()]], nombre_media = nombre_media_global,
-                          control_lanzamiento = FALSE, colores = ic[punto_seleccionado(),3:4])
+                          control_lanzamiento = FALSE, colores = ic[punto_seleccionado(), 3:4])
         } else {
           hist_muestra_IC(x = muestras[[punto_seleccionado()]]$data1, y = muestras[[punto_seleccionado()]]$data2,
-                          nombre_media = nombre_media_global, control_lanzamiento = FALSE, colores = ic[punto_seleccionado(),3:4])
+                          nombre_media = nombre_media_global, control_lanzamiento = FALSE, colores = ic[punto_seleccionado(), 3:4])
         }
       })
     } else {
       output$histogramaIC = renderPlot({
         if(nombre_media_global == "Una"){
           hist_muestra_IC(x = muestras[[simulaciones_global]], nombre_media = nombre_media_global,
-                          control_lanzamiento = TRUE, colores = ic[simulaciones_global,3:4])
+                          control_lanzamiento = TRUE, colores = ic[simulaciones_global, 3:4])
         } else {
           hist_muestra_IC(x = muestras[[simulaciones_global]]$data1, y = muestras[[simulaciones_global]]$data2,
-                           nombre_media = nombre_media_global, control_lanzamiento = TRUE, colores = ic[simulaciones_global,3:4])
+                           nombre_media = nombre_media_global, control_lanzamiento = TRUE, colores = ic[simulaciones_global, 3:4])
         }
       })
     }
@@ -538,8 +542,7 @@ function(input, output, session) {
     return(c(estadistico_prueba, valor_critico))
   }
   
-  
-  observeEvent(input$go_PH, {
+  observeEvent(list(input$go_PH), {
     confianza = input$confianzaPH/100
     mu0 = input$mu0PH
     mediaMuestra = input$mediaMuestraPH
