@@ -2,6 +2,7 @@ library(shiny)
 library(shinydashboard)
 library(Cairo)
 options(shiny.usecairo = T)
+library(kableExtra)
 
 function(input, output, session) {
   
@@ -90,6 +91,8 @@ function(input, output, session) {
     
     n = input$nDM1
     simulaciones = input$simulacionesDM1
+    
+    # set.seed(2024) # Bind cache
     
     if(input$distribucionDM1 == "Normal"){
       media = input$mediaDM1_normal
@@ -269,14 +272,14 @@ function(input, output, session) {
   grafico_IC = function(x, y, colores, limites_x, simulaciones, media, nombre_media, tipoIC){
     plot(
       x = x, y = 1:simulaciones, col = colores[,1], pch = 16, las = 1, bty = "n",
-      ylim = c(-10, simulaciones), xlim = limites_x, xaxt = "n", yaxt = "n",
+      ylim = c(-5, simulaciones + 5), xlim = limites_x, xaxt = "n", yaxt = "n",
       xlab = "Valores del IC", ylab = "Número de simulación",
       main = ifelse(nombre_media == "Una",
                     "IC para la media proveniente \n de una distribución normal",
                     "IC para la diferencia de medias (X-Y) \n provenientes de distribuciones normales")
     )
     axis(side = 1, at = c(limites_x[1], media, limites_x[2]), labels = c(limites_x[1], media, limites_x[2]), xlim = limites_x)
-    axis(side = 2, at = round(seq(from = 1, to = simulaciones, length.out = 10), 0))
+    axis(side = 2, at = round(seq(from = 1, to = simulaciones, length.out = 10), 0), las = 1)
     points(x = y, y = 1:simulaciones, pch = 16, col = colores[,2])
     if(tipoIC == "less"){
       arrows(x1 = x, x0 = y, y1 = 1:simulaciones, y0 = 1:simulaciones, length = 0.07, col = colores[,2])
@@ -295,8 +298,8 @@ function(input, output, session) {
     negros = paste(negros, "%")
     # abline(v = media, col = "black", lty = 2)
     segments(x0 = media, y0 = 0, x1 = media, y1 = simulaciones+1, lty = 2)
-    legend("bottomleft", legend = c(negros, rojos), lty = 1, col = c("black", "red"), title = "Proporción de IC", bty = "n")
-    legend("bottomright", legend = c("Haga click en un IC (o cerca) \n para ver la distribución de los \n datos de la muestra. \n \n"), bty = "n")
+    legend("topleft", legend = c(negros, rojos), lty = 1, col = c("black", "red"), title = "Proporción de IC", bty = "n")
+    legend("bottomleft", legend = c("Haga click en un IC (o cerca) \n para ver la distribución de los \n datos de la muestra. \n \n"), bty = "n")
   }
   
   IC = function(tipo_varianzas, tipoIC, extremos, confianza, varianza, varianzaX = NA, varianzaY = NA,
@@ -569,6 +572,143 @@ function(input, output, session) {
                     est_prueba = valor_critico[1], valor_critico = valor_critico[2], confianza = confianza)
     }, height = 400)
     
+  })
+  
+  ### Regresión Lineal (Simple)
+  
+  regresion = function(x, y){
+    modelo = lm(y ~ x)
+    return(modelo)
+  }
+  
+  grafico_RL = function(x, y, modelo){
+    betas = modelo$coefficients
+    confidence_values = predict.lm(modelo, interval = "confidence")
+    prediction_values = predict.lm(modelo, newdata = data.frame("x" = x, "y" = y), interval = "prediction")
+    y_confidence = confidence_values[order(confidence_values[,1]), 2:3]
+    y_prediction = prediction_values[order(prediction_values[,1]), 2:3]
+    plot(x = x, y = y, las = 1, bty = "n",
+         main = "Regresión Lineal Simple", xlab = "Valores de X", ylab = "Valores de Y",
+         ylim = c(min(c(y, y_confidence, y_prediction)), max(c(y, y_confidence, y_prediction))))
+    segments(x0 = min(x), x1 = max(x), y0 = betas[1] + betas[2]*min(x), y1 = betas[1] + betas[2]*max(x), col = "red", lty = 1)
+    lines(x = x[order(x)], y = y_confidence[,1], col = "blue", lty = 2)
+    lines(x = x[order(x)], y = y_confidence[,2], col = "blue", lty = 2)
+    lines(x = x[order(x)], y = y_prediction[,1], col = "darkgreen" ,lty = 2)
+    lines(x = x[order(x)], y = y_prediction[,2], col = "darkgreen", lty = 2)
+    legend("topleft", legend = c("Recta de regresión ajustada", "IC del 95% para la media", "IC del 95% para la predicción"),
+           lty = c(1, 2, 2), col = c("red", "blue", "darkgreen"), bty = "n")
+  }
+  
+  grafico_supuestos = function(x, y, modelo){
+    par(mfrow = c(2,2), bty = "n", las = 1)
+    plot(x = modelo$fitted.values, y = residuals(modelo),
+         main = "Linealidad", xlab = "Valores ajustados", ylab = "Residuos")
+    acf(residuals(modelo),
+        main = "Independenica \n (Función de Autocorrelación: ACF)", xlab = "Lag", ylab = "ACF")
+    plot(x = modelo$fitted.values, y = sqrt(abs(rstandard(modelo))),
+         main = "Homocedasticidad", xlab = "Valores ajustados", ylab = "Raíz de los residuos estandarizados")
+    qqnorm(modelo$residuals, main = "Normalidad \n (Cuantil - Cuantil)", xlab = "Cuantiles teóricos", ylab = "Cuantiles observados")
+    qqline(modelo$residuals)
+  }
+  
+  violacion_supuestos = function(x, y){
+    
+    aux_y = y
+    aux_x = x
+    
+    if(!is.null(input$violacionSupuestos)){
+      
+      if ("Linealidad" %in% input$violacionSupuestos){
+        y = y + (x/70)^3
+      }
+      
+      if ("Independencia" %in% input$violacionSupuestos ){
+        y = apply(X = as.matrix(cbind(seq(from = 0, to = 45, length.out = length(y)), y)), MARGIN = 1, FUN = function(fila){
+          recorrido =  sin(fila[1])*200 + fila[2]
+          return(recorrido)
+        })
+      } 
+      
+      if ("Homocedasticidad" %in% input$violacionSupuestos){
+        incrementos = cumsum(seq(from = 0.8, to = 1.2, length.out = length(y)))
+        y = abs(y*incrementos - max(y)/2)
+      }
+      
+      if ("Normalidad" %in% input$violacionSupuestos){
+        n_min = y[order(y)][8]
+        n_max = y[order(y)][(length(y)-8)]
+        y[y <= n_min] = y[y <= n_min] - y[y == n_max]*0.5
+        y[y >= n_max] = y[y >= n_max] + y[y == n_max]*0.5
+      } 
+    }
+    return(y)
+  }
+  
+  observeEvent(list(input$go_RL), {
+    
+    set.seed(2024)
+    desviacion_simulacion = 100
+    x_poblacion = seq(from = 1, to = input$nPoblacionalRLS, by = 1)
+    y_poblacion = apply(X = as.matrix(x_poblacion + 100), MARGIN = 1, FUN = function(media){
+      return(rnorm(n = 1, mean = media, sd = desviacion_simulacion))
+    })
+    
+    n_muestra = sample(x = 1:input$nPoblacionalRLS, size = input$nMuestralRLS, replace = FALSE)
+    x_muestral = x_poblacion[n_muestra]
+    y_muestral = y_poblacion[n_muestra]
+    y_muestral = violacion_supuestos(x = x_muestral, y = y_muestral)
+    RL = regresion(x = x_muestral, y = y_muestral)
+    
+    output$plot_rl = renderPlot({
+      grafico_RL(x = x_muestral, y = y_muestral, modelo = RL)
+    })
+    
+    output$plot_supuestos = renderPlot({
+      grafico_supuestos(x = x_muestral, y = y_muestral, modelo = RL)
+    })
+    
+    output$resumen_rl = function(){
+      summary_RL = round(summary(RL)$coefficients, digits = 4)
+      summary_RL = ifelse(summary_RL == 0, "<2e-16", summary_RL)
+      rownames(summary_RL) <- c("β<sub>0</sub>", "β<sub>1</sub>")
+      kableExtra::kbl(summary_RL, escape = FALSE, booktabs = T, align = "c",
+            caption = "Resumen del modelo de regresión lineal",
+            col.names = c("Estimación", "Error estándar", "Estadístico de prueba t", "Valor-p")) |>
+        kableExtra::kable_styling(full_width = TRUE, bootstrap_options = c("condensed", "striped"))
+    }
+    
+    output$resumen_rl_metricas = function(){
+      summary_RL = summary(RL)
+      metrics = round(unlist(summary_RL[c("fstatistic", "sigma", "r.squared", "adj.r.squared")])[c(1,4:6)], digits = 4)
+      kableExtra::kbl(t(as.matrix(metrics)), escape = FALSE, booktabs = T, align = "c",
+        col.names = c("Estadístico F<sub>0</sub>", "Error estándar residual", "R<sup>2</sup>", "R<sup>2</sup> ajustado")) |>
+        kableExtra::kable_styling(full_width = TRUE, bootstrap_options = c("condensed", "striped"))
+    }
+
+    output$resumen_supuestos = function(){
+      
+      tests = list(
+        lmtest::bptest(formula = formula(RL), data = data.frame("x" = x_muestral, "y" = y_muestral)),
+        lmtest::dwtest(formula = formula(RL), data = data.frame("x" = x_muestral, "y" = y_muestral), alternative = "two.sided"),
+        shapiro.test(x = rstandard(RL))
+      ) |> lapply(FUN = function(test){
+        valor_p = round(test$p.value, digits = 4)
+        statistic = round(test$statistic, digits = 4)
+        valor_p = ifelse(valor_p < 0.0001, "<1e-4", valor_p)
+        statistic = ifelse(statistic < 0.0001, "<1e-4", statistic)
+        return(c(statistic, valor_p))
+      }) |> unlist() |> matrix(ncol = 2, byrow = TRUE) |> data.frame() |> setNames(c("Estadístico", "Valor-p"))
+      
+      
+      tests$Prueba = c("Breusch-Pagan", "Durbin-Watson", "Shapiro-Wilk")
+      tests$Supuesto = c("Homocedasticidad", "Independencia", "Normalidad")
+      tests = tests[, c("Supuesto", "Prueba", "Estadístico", "Valor-p")]
+      
+      kableExtra::kbl(tests, escape = FALSE, booktabs = T, align = "c",
+        caption = "Prueba de hipótesis de los supuestos del modelo de regresión lineal") |>
+        kableExtra::kable_styling(full_width = TRUE, bootstrap_options = c("condensed", "striped"))
+    }
+
   })
   
 # End general function  
