@@ -1,5 +1,6 @@
 library(shiny)
 library(shinydashboard)
+library(shinydashboardPlus)
 library(Cairo)
 options(shiny.usecairo = T)
 library(kableExtra)
@@ -27,6 +28,31 @@ function(input, output, session) {
   # }, priority = 0)
   
   ### END CUSTOM URL FOR MENUITEM IN SIDEBARMENU
+  
+  output$user <- renderUser({
+    dashboardUser(
+      name = "Daniel Franzani",
+      image = "https://adminlte.io/themes/AdminLTE/dist/img/user2-160x160.jpg",
+      title = "Ciencia de Datos",
+      subtitle = "",
+      fluidRow(
+        dashboardUserItem(
+          width = 6,
+          socialButton(
+            href = "https://github.com",
+            icon = icon("github-square")
+          )
+        ),
+        dashboardUserItem(
+          width = 6,
+          socialButton(
+            href = "https://dropbox.com",
+            icon = icon("blog")
+          )
+        )
+      )
+    )
+  })
   
   
   ### Distribuciones muestrales
@@ -62,7 +88,7 @@ function(input, output, session) {
   }
   
   densidad_masa = function(x, valores, tipo, graph = "p"){
-    plot(x, valores, main = paste("Función de ", tipo, " probabilidad"),
+    plot(x, valores, main = paste("Función de ", tipo, " probabilidad"), bty = "n",
          xlab = "Valores de X", ylab = "", las = 1, type = graph, pch = 16)
   }
   
@@ -73,13 +99,15 @@ function(input, output, session) {
       "valores" = unlist(valores[1:cantidad]),
       "dominio" = rep(1:cantidad, rep(largo, cantidad))
     )
-    plot(
-      datos$dominio, datos$valores,
+    boxplot(
+      datos$valores ~ datos$dominio, frame = F,
       main = paste("Primeras ", cantidad, " simulaciones"),
-      xlab = "Simulación", ylab = "Valores de X simulados", xaxt = "n",
+      xlab = "Simulación", ylab = "Valores simulados", xaxt = "n", yaxt = "n",
       las = 1, pch = 16, ylim = c(min(datos$valores), max(datos$valores)*1.4)
     )
     axis(side = 1, at = 1:cantidad, labels = paste0("S", 1:cantidad))
+    axis(side = 2, at = seq(from = min(datos$valores), to = max(datos$valores), length.out = 5),
+         labels = round(seq(from = min(datos$valores), to = max(datos$valores), length.out = 5)), las = 1)
     legend(
       "top", 
       legend = paste0(rep("S", cantidad), 1:cantidad, rep(": ", cantidad),

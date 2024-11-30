@@ -1,11 +1,24 @@
 library(shiny)
 library(shinydashboard)
+library(shinydashboardPlus)
 library(Cairo)
 options(shiny.usecairo = T)
+library(kableExtra)
 
 # Encabezado general
 
-encabezado = dashboardHeader(title = "Estadística")
+# encabezado = dashboardHeader(title = "Estadística",
+#                              # tags$li(class = "dropdown",
+#                              #         tags$a(href = "https://www.linkedin.com/in/dfranzani/",
+#                                             # icon("linkedin"), "", target = "_blank")),
+#                              tags$li(class = "dropdown",
+#                                      tags$a(href = "https://github.com/Dfranzani",
+#                                             icon("github"), "", target = "_blank")),
+#                              tags$li(class = "dropdown",
+#                                      tags$a(href = "https://dfranzani.netlify.app/",
+#                                             icon("blog"), "", target = "_blank")))
+
+encabezado = dashboardHeader(title = "Estadística", userOutput("user"))
 
 # Panel lateral general: filtro de temas
 
@@ -165,6 +178,6 @@ cuerpo = dashboardBody(
 )
 
 # Despliegue general
-ui = dashboardPage(header = encabezado, sidebar = panelLateral, body = cuerpo, skin = "black")
+ui = dashboardPage(header = encabezado, sidebar = panelLateral, body = cuerpo, skin = "black", title = "Hola")
 
 
