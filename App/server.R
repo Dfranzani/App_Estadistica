@@ -32,7 +32,7 @@ function(input, output, session) {
   output$user <- renderUser({
     dashboardUser(
       name = "Daniel Franzani",
-      image = "https://adminlte.io/themes/AdminLTE/dist/img/user2-160x160.jpg",
+      image = "https://raw.githubusercontent.com/Dfranzani/App_Estadistica/refs/heads/main/App/Logo/Ayun.jpeg",
       title = "Ciencia de Datos",
       subtitle = "",
       fluidRow(
