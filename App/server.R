@@ -1,6 +1,6 @@
 library(shiny)
 library(shinydashboard)
-library(shinydashboardPlus)
+# library(shinydashboardPlus)
 library(Cairo)
 options(shiny.usecairo = T)
 library(kableExtra)
@@ -30,15 +30,15 @@ function(input, output, session) {
   
   ### END CUSTOM URL FOR MENUITEM IN SIDEBARMENU
   
-  output$user <- renderUser({
-    dashboardUser(
+  output$user <- shinydashboardPlus::renderUser({
+    shinydashboardPlus::dashboardUser(
       name = "Daniel Franzani",
       image = "https://raw.githubusercontent.com/Dfranzani/App_Estadistica/refs/heads/main/App/Logo/Profile.jpeg",
       title = "Ciencia de Datos",
       subtitle = "",
       fluidRow(
-        dashboardUserItem(width = 6, socialButton(href = "https://github.com/Dfranzani", icon = icon("github-square"))),
-        dashboardUserItem(width = 6, socialButton(href = "https://dfranzani.github.io/website/principal/home.html", icon = icon("blog")))
+        shinydashboardPlus::dashboardUserItem(width = 6,shinydashboardPlus::socialButton(href = "https://github.com/Dfranzani", icon = icon("github-square"))),
+        shinydashboardPlus::dashboardUserItem(width = 6, shinydashboardPlus::socialButton(href = "https://dfranzani.github.io/website/principal/home.html", icon = icon("blog")))
       )
     )
   })

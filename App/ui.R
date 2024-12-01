@@ -1,6 +1,6 @@
 library(shiny)
 library(shinydashboard)
-library(shinydashboardPlus)
+# library(shinydashboardPlus)
 library(Cairo)
 options(shiny.usecairo = T)
 library(kableExtra)
@@ -8,7 +8,7 @@ library(shinyBS)
 
 # Encabezado general
 
-encabezado = dashboardHeader(title = "Estadística", userOutput("user"))
+encabezado = dashboardHeader(title = "Estadística", shinydashboardPlus::userOutput("user"))
 
 # Panel lateral general: filtro de temas
 
@@ -173,6 +173,6 @@ cuerpo = dashboardBody(
 )
 
 # Despliegue general
-ui = dashboardPage(header = encabezado, sidebar = panelLateral, body = cuerpo, skin = "black", title = "Hola")
+ui = dashboardPage(header = encabezado, sidebar = panelLateral, body = cuerpo, skin = "black")
 
 
