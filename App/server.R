@@ -4,6 +4,7 @@ library(shinydashboardPlus)
 library(Cairo)
 options(shiny.usecairo = T)
 library(kableExtra)
+library(shinyBS)
 
 function(input, output, session) {
   
@@ -32,28 +33,15 @@ function(input, output, session) {
   output$user <- renderUser({
     dashboardUser(
       name = "Daniel Franzani",
-      image = "https://raw.githubusercontent.com/Dfranzani/App_Estadistica/refs/heads/main/App/Logo/Ayun.jpeg",
+      image = "https://raw.githubusercontent.com/Dfranzani/App_Estadistica/refs/heads/main/App/Logo/Profile.jpeg",
       title = "Ciencia de Datos",
       subtitle = "",
       fluidRow(
-        dashboardUserItem(
-          width = 6,
-          socialButton(
-            href = "https://github.com",
-            icon = icon("github-square")
-          )
-        ),
-        dashboardUserItem(
-          width = 6,
-          socialButton(
-            href = "https://dropbox.com",
-            icon = icon("blog")
-          )
-        )
+        dashboardUserItem(width = 6, socialButton(href = "https://github.com/Dfranzani", icon = icon("github-square"))),
+        dashboardUserItem(width = 6, socialButton(href = "https://dfranzani.github.io/website/principal/home.html", icon = icon("blog")))
       )
     )
   })
-  
   
   ### Distribuciones muestrales
   
@@ -88,7 +76,7 @@ function(input, output, session) {
   }
   
   densidad_masa = function(x, valores, tipo, graph = "p"){
-    plot(x, valores, main = paste("Función de ", tipo, " probabilidad"), bty = "n",
+    plot(x, valores, main = paste("Función de ", tipo, " de probabilidad de \n los datos muestrales simulados"), bty = "n",
          xlab = "Valores de X", ylab = "", las = 1, type = graph, pch = 16)
   }
   
@@ -300,7 +288,7 @@ function(input, output, session) {
   grafico_IC = function(x, y, colores, limites_x, simulaciones, media, nombre_media, tipoIC){
     plot(
       x = x, y = 1:simulaciones, col = colores[,1], pch = 16, las = 1, bty = "n",
-      ylim = c(-5, simulaciones + 5), xlim = limites_x, xaxt = "n", yaxt = "n",
+      ylim = c(1, simulaciones + 5), xlim = limites_x, xaxt = "n", yaxt = "n",
       xlab = "Valores del IC", ylab = "Número de simulación",
       main = ifelse(nombre_media == "Una",
                     "IC para la media proveniente \n de una distribución normal",
@@ -327,7 +315,6 @@ function(input, output, session) {
     # abline(v = media, col = "black", lty = 2)
     segments(x0 = media, y0 = 0, x1 = media, y1 = simulaciones+1, lty = 2)
     legend("topleft", legend = c(negros, rojos), lty = 1, col = c("black", "red"), title = "Proporción de IC", bty = "n")
-    legend("bottomleft", legend = c("Haga click en un IC (o cerca) \n para ver la distribución de los \n datos de la muestra. \n \n"), bty = "n")
   }
   
   IC = function(tipo_varianzas, tipoIC, extremos, confianza, varianza, varianzaX = NA, varianzaY = NA,
@@ -449,6 +436,11 @@ function(input, output, session) {
     }
   })
   
+ 
+  addPopover(session, id = "plot_ic", trigger = "hover", placement = "left",
+             content = "Haga click en un IC (o cerca) para ver la distribución de los datos muestrales asociados.",
+             title = "")
+  
   ### Pruebas de hipótesis
   
   grafico_estadisticoPrueba = function(ic, mediaMuestra, varianza, mu0, tipoPH, nMuestra, est_prueba, valor_critico, confianza){
@@ -469,9 +461,9 @@ function(input, output, session) {
          labels = round(c(limites[1], 0, limites[2]), 2), cex.axis = 1, las = 1)
     
     if(tipoPH == "two.sided") {
-      axis(side = 1, at = c(-est_prueba, est_prueba), labels = round(c(-est_prueba, est_prueba), 2),
+      axis(side = 1, at = c(-abs(est_prueba), abs(est_prueba)), labels = round(c(-abs(est_prueba), abs(est_prueba)), 2),
            col.axis = "red", cex.axis = 1, las = 1)
-      axis(side = 1, at = c(-valor_critico, valor_critico), labels = round(c(-valor_critico, valor_critico), 2),
+      axis(side = 1, at = c(-abs(valor_critico), abs(valor_critico)), labels = round(c(-abs(valor_critico), abs(valor_critico)), 2),
            col.axis = "blue", cex.axis = 1, las = 1)
       polygon(x = c(-abs(valor_critico), valores_x[valores_x <= -abs(valor_critico)]),
               y = c(min(dnorm(x = valores_x[valores_x <= -abs(valor_critico)])), dnorm(x = valores_x[valores_x <= -abs(valor_critico)])),
@@ -511,9 +503,13 @@ function(input, output, session) {
               lty = 2, density = 5, col = "red", angle = 135)
       valor_p = 1 - pnorm(est_prueba)
     }
-    legend("topright", legend = paste(c("Valor-p:", "Significancia:"), round(c(valor_p, 1 - confianza), 4)), bty = "n",
+    
+    valor_p2 = ifelse(valor_p < 0.0001, "<1e-4", round(valor_p, digits = 4))
+    significancia = format((1 - confianza))
+    legend("topright", legend = paste(c("Valor-p:", "Significancia:"), c(valor_p2, significancia)), bty = "n",
            lty = 2, col = c("red", "blue"))
-    legend("topleft", legend = ifelse(valor_p  <= 1 - confianza, "Se rechaza", "No se rechaza"), bty = "n", title = "Estado:", text.font = 4)
+    legend("topleft", legend = ifelse(valor_p  <= 1 - confianza, "Se rechaza", "No se rechaza"), bty = "n",
+           title = "Estado:", text.font = 4)
   }
   
   grafico_IC_PH = function(ic, mediaMuestra, varianza, mu0, tipoPH, nMuestra, est_prueba, valor_critico, confianza){
@@ -601,6 +597,10 @@ function(input, output, session) {
     }, height = 400)
     
   })
+  
+  addPopover(session, id = "plot_ic_ph", trigger = "hover", placement = "left",
+             content = "Se rechaza la hipótesis nula cuando la línea roja punteada (IC) intersecta la línea vertical negra punteada (media bajo hipótesis nula).",
+             title = "")
   
   ### Regresión Lineal (Simple)
   
@@ -738,6 +738,10 @@ function(input, output, session) {
     }
 
   })
+  
+  addPopover(session = session, id = "resumen_supuestos", trigger = "hover", placement = "bottom",
+             content = "Es posible que la violación de un determinado supuesto influya en otro. Revise el caso de violación del supuesto de homocedasticidad únicamente.",
+             title = "") 
   
 # End general function  
 }

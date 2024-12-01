@@ -4,19 +4,9 @@ library(shinydashboardPlus)
 library(Cairo)
 options(shiny.usecairo = T)
 library(kableExtra)
+library(shinyBS)
 
 # Encabezado general
-
-# encabezado = dashboardHeader(title = "Estadística",
-#                              # tags$li(class = "dropdown",
-#                              #         tags$a(href = "https://www.linkedin.com/in/dfranzani/",
-#                                             # icon("linkedin"), "", target = "_blank")),
-#                              tags$li(class = "dropdown",
-#                                      tags$a(href = "https://github.com/Dfranzani",
-#                                             icon("github"), "", target = "_blank")),
-#                              tags$li(class = "dropdown",
-#                                      tags$a(href = "https://dfranzani.netlify.app/",
-#                                             icon("blog"), "", target = "_blank")))
 
 encabezado = dashboardHeader(title = "Estadística", userOutput("user"))
 
@@ -126,9 +116,9 @@ cuerpo_PH = sidebarLayout(
     radioButtons(inputId = "mediasPH", label = "Medias", choices = c("Una")),#, "Dos")),
     radioButtons(inputId = "varianazasPH", label = "Varianzas", choices = c("Conocidas")),#, "Desconocidas")),
     radioButtons(inputId = "tipoPH", label = "Tipo de prueba", choices = c("Bilateral", "Unilateral derecha", "Unilateral izquierda")),
-    sliderInput(inputId = "mu0PH", label = "Media bajo Hipótesis nula", min = -5, max = 5, value = 0, step = 0.02),
+    sliderInput(inputId = "mu0PH", label = "Media bajo Hipótesis nula", min = -2, max = 2, value = 0, step = 0.02),
     sliderInput(inputId = "sigma2PH", label = "Varianza poblacional", min = 1, max = 50, value = 10, step = 0.5),
-    sliderInput(inputId = "mediaMuestraPH", label = "Media muestral", min = -5, max = 5, value = 0.6, step = 0.02),
+    sliderInput(inputId = "mediaMuestraPH", label = "Media muestral", min = -2, max = 2, value = 0.6, step = 0.02),
     sliderInput(inputId = "nPH", label = "Tamaño muestral", min = 10, max = 200, value = 120, step = 10),
     sliderInput(inputId = "confianzaPH", label = "% Confianza", min = 10, max = 99, value = 87, step = 1),
     simulador3
@@ -167,8 +157,13 @@ cuerpo_RL = sidebarLayout(
     )
   )
 )
+
+hover_load_BS_package = bsPopover(id = "Histograma_promedios", trigger = "hover", placement = "left",
+                                   content = "La función Aproximada corresponde a la función de densidad que generan los promedios muestrales simulados, la cual, se compara con la función de densidad Teórica.",
+                                   title = "")
+
 # Asignando los cuerpos por filtro
-hoja_DM = tabItem(tabName = "DM1", fluidPage(cuerpo_DM1))
+hoja_DM = tabItem(tabName = "DM1", fluidPage(cuerpo_DM1), hover_load_BS_package)
 hoja_IC = tabItem(tabName = "IC", fluidPage(cuerpo_IC))
 hoja_PH = tabItem(tabName = "PH", fluidPage(cuerpo_PH))
 hoja_RL = tabItem(tabName = "RL", fluidPage(cuerpo_RL))
