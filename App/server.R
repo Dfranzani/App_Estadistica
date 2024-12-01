@@ -33,7 +33,7 @@ function(input, output, session) {
   output$user <- shinydashboardPlus::renderUser({
     shinydashboardPlus::dashboardUser(
       name = "Daniel Franzani",
-      image = "https://raw.githubusercontent.com/Dfranzani/App_Estadistica/refs/heads/main/App/Logo/Profile.jpeg",
+      image = "https://raw.githubusercontent.com/Dfranzani/CV/refs/heads/main/Profile.jpeg",
       title = "Ciencia de Datos",
       subtitle = "",
       fluidRow(
