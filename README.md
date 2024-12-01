@@ -1,7 +1,8 @@
 # Aplicación web de conceptos estadísticos
 
 La [App web](https://dfranzani.github.io/App_Estadistica/) se desarrolló con el fin de poder visualizar y entender 
-de una manera más sencilla conceptos estadísticos (pueden visitar los documentos web en donde se detallan dichos conceptos).
+de una manera más sencilla conceptos estadísticos (pueden visitar los documentos web en donde se detallan dichos conceptos: 
+[Estadística I](https://dfranzani.github.io/Estadistica_I/) y [Estadística II](https://dfranzani.github.io/Estadistica_II/)).
  Hasta el momento se han desarrollado los siguientes conceptos:
 
 1. **Teorema central del límite** (TCL o TLC): en este apartado se puede visualizar cómo se comporta la distribución de la media de distintas
