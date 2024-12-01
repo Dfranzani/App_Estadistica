@@ -37,24 +37,14 @@ function(input, output, session) {
       title = "Ciencia de Datos",
       subtitle = "",
       fluidRow(
-        shinydashboardPlus::dashboardUserItem(width = 6,shinydashboardPlus::socialButton(href = "https://github.com/Dfranzani", icon = icon("github-square"))),
+        shinydashboardPlus::dashboardUserItem(width = 6, shinydashboardPlus::socialButton(href = "https://github.com/Dfranzani", icon = icon("github-square"))),
         shinydashboardPlus::dashboardUserItem(width = 6, shinydashboardPlus::socialButton(href = "https://dfranzani.github.io/website/principal/home.html", icon = icon("blog")))
       )
     )
   })
   
   ### Distribuciones muestrales
-  
-  # observeEvent(input$distribucionDM1,{
-  #   output$Histograma_promedios = renderPlot({
-  #     plot(1, 1, col = "white", ylab = "", xlab = "", axes = F)
-  #   })
-  #   
-  #   output$fdp_fmp_simulaciones = renderPlot({
-  #     plot(1, 1, col = "white", ylab = "", xlab = "", axes = F)
-  #   })
-  # })
-  
+
   histTCL = function(valores, media, desviacion, simulaciones){
     medias = unlist(lapply(X = valores, FUN = mean))
     factor = max(abs(media - c(min(medias), max(medias))))
@@ -196,7 +186,6 @@ function(input, output, session) {
       })
     }
   })
-  
   
   ### Intervalos de confianza
   

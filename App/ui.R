@@ -1,6 +1,6 @@
 library(shiny)
 library(shinydashboard)
-# library(shinydashboardPlus)
+# library(shinydashboardPlus1)
 library(Cairo)
 options(shiny.usecairo = T)
 library(kableExtra)
@@ -8,7 +8,10 @@ library(shinyBS)
 
 # Encabezado general
 
-encabezado = dashboardHeader(title = "Estadística", shinydashboardPlus::userOutput("user"))
+encabezado = dashboardHeader(title = "Estadística",
+                             tags$li(class = "dropdown",
+                                     tags$a(href = "https://github.com/Dfranzani/App_Estadistica/discussions", icon("comments"), "Comentarios y sugerencias", target = "_blank")),
+                             shinydashboardPlus::userOutput("user"))
 
 # Panel lateral general: filtro de temas
 
@@ -52,7 +55,8 @@ cuerpo_DM1 = sidebarLayout(
     ),
     sliderInput(inputId = "nDM1", label = "Tamaño muestral", min = 100, max = 1000, value = 200, step = 50),
     sliderInput(inputId = "simulacionesDM1", label = "Cantidad de simulaciones", min = 100, max = 7000, value = 1300, step = 100),
-    simulador
+    simulador, br(), br(),
+    a("Nota: para mayor información consulte el siguiente documento.", href = "https://dfranzani.github.io/Estadistica_I/distribuciones-muestrales.html#teorema-del-l%C3%ADmite-central")
   ),
   mainPanel(
     width = 9,
@@ -97,7 +101,8 @@ cuerpo_IC = sidebarLayout(
       ),
     ),
     sliderInput(inputId = "simulacionesIC", label = "Cantidad de simulaciones", min = 10, max = 100, value = 60, step = 1),
-    simulador2
+    simulador2, br(), br(),
+    a("Nota: para mayor información consulte el siguiente documento.", href = "https://dfranzani.github.io/Estadistica_II/intervalos-de-confianza.html")
   ),
   mainPanel(
     width = 9,
@@ -121,7 +126,8 @@ cuerpo_PH = sidebarLayout(
     sliderInput(inputId = "mediaMuestraPH", label = "Media muestral", min = -2, max = 2, value = 0.6, step = 0.02),
     sliderInput(inputId = "nPH", label = "Tamaño muestral", min = 10, max = 200, value = 120, step = 10),
     sliderInput(inputId = "confianzaPH", label = "% Confianza", min = 10, max = 99, value = 87, step = 1),
-    simulador3
+    simulador3, br(), br(),
+    a("Nota: para mayor información consulte el siguiente documento.", href = "https://dfranzani.github.io/Estadistica_II/PH.html")
   ),
   mainPanel(
     width = 9,
@@ -147,7 +153,8 @@ cuerpo_RL = sidebarLayout(
     ),
     checkboxGroupInput(inputId = "violacionSupuestos", label = "Violación de supuestos",
                        choices = c("Linealidad", "Normalidad", "Homocedasticidad", "Independencia")),
-    simulador4
+    simulador4, br(), br(),
+    a("Nota: para mayor información consulte el siguiente documento.", href = "https://dfranzani.github.io/Estadistica_II/regresi%C3%B3n-lineal.html#regresi%C3%B3n-lineal-simple")
   ),
   mainPanel(
     width = 10,
