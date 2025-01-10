@@ -152,5 +152,5 @@ observeEvent(list(input$go_PH), {
 })
 
 addPopover(session, id = "plot_ic_ph", trigger = "hover", placement = "left",
-           content = "Se rechaza la hipótesis nula cuando la línea roja punteada (IC) intersecta la línea vertical negra punteada (media bajo hipótesis nula).",
+           content = "Se rechaza la hipótesis nula cuando la línea roja punteada (IC) no intersecta la línea vertical negra punteada (media bajo hipótesis nula).",
            title = "")

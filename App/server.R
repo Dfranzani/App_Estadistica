@@ -1,8 +1,10 @@
 library(shiny)
 library(shinydashboard)
 # library(shinydashboardPlus)
-library(Cairo)
-options(shiny.usecairo = T)
+# library(Cairo)
+# options(shiny.usecairo = T)
+library(ragg)
+options(shiny.useragg = T)
 library(kableExtra)
 library(shinyBS)
 
